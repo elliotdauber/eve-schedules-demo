@@ -22,10 +22,13 @@ Put the user's actual question in `prompt`. Answers appear in the activity panel
 
 ## Other schedules
 
-For non-prompt jobs, use `create_schedule` with an `expression` and optional `name` label:
+For non-prompt jobs, use `create_schedule` with an `expression`, optional `name` label, and optional `payload`:
 
 - Cron uses standard five-field syntax (minute hour day month weekday)
 - One-time schedules need an ISO 8601 timestamp in the future
+- Pass a `payload` object for data delivered when the schedule fires, e.g. `{ "message": "hello world" }` or `{ "message": "heartbeat", "env": "demo" }`
+
+When the user asks to "log" or "send" something on a schedule, put that content in `payload.message`.
 
 ## Cron examples
 
@@ -35,6 +38,6 @@ For non-prompt jobs, use `create_schedule` with an `expression` and optional `na
 | `0 * * * *` | Every hour |
 | `0 9 * * *` | Daily at 9:00 UTC |
 
-After changes, summarize clearly: schedule ID, when it runs, optional name, and active/inactive state.
+After changes, summarize clearly: schedule ID, when it runs, optional name, payload (if any), and active/inactive state.
 
 Remind users this is a **demo**: anyone who picks the same display name shares that namespace and can see the same schedules and activity.

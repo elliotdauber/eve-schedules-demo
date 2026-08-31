@@ -2,10 +2,8 @@ import { Schedules } from '@vercel/schedules';
 import type { ScheduleExpression } from '@vercel/schedules';
 import { defineTool } from 'eve/tools';
 import { z } from 'zod';
-import {
-  DEFAULT_QUEUE_TOPIC,
-  encodePromptName,
-} from '@/lib/constants';
+import { DEFAULT_QUEUE_TOPIC } from '@/lib/constants';
+import { createPromptPayload } from '@/lib/schedule-payload';
 import { toScheduleSummary } from '@/lib/schedule-present';
 import { getScheduleInNamespace } from '@/lib/schedules-tenant';
 import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
@@ -60,19 +58,20 @@ export default defineTool({
   async execute({ prompt, when, name }, ctx) {
     const namespace = getTenantNamespaceFromContext(ctx);
     const expression = whenToExpression(when);
-    const scheduleName = name ?? encodePromptName(prompt);
+    const payload = createPromptPayload(prompt);
 
     const result = await Schedules.create({
       expression,
       target: { topic: DEFAULT_QUEUE_TOPIC },
       namespace,
-      name: scheduleName,
+      name: name ?? 'Scheduled prompt',
+      payload,
     });
 
     const schedule = await getScheduleInNamespace(result.scheduleId, namespace);
 
     return {
-      schedule: toScheduleSummary(schedule),
+      schedule: toScheduleSummary(schedule, payload),
       note: 'The answer will appear in the activity panel when the schedule runs.',
     };
   },

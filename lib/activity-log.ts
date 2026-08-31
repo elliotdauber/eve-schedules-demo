@@ -7,6 +7,7 @@ export type ActivityRecord = {
   type: 'job' | 'prompt';
   scheduleId?: string;
   scheduleName?: string;
+  message?: string;
   prompt?: string;
   answer?: string;
   payload?: unknown;

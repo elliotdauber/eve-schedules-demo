@@ -8,7 +8,7 @@ import styles from './agent-chat.module.css';
 
 const SUGGESTIONS = [
   'List all my schedules',
-  'Create a job named heartbeat that runs every minute',
+  'Every minute, log "hello world" as a scheduled job',
   'In 30 seconds, tell me a fun fact about the moon',
   'Delete a schedule — show me what exists first',
 ];

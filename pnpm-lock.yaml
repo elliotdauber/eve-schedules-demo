@@ -18,8 +18,8 @@ importers:
         specifier: ^0.5.1
         version: 0.5.1
       '@vercel/schedules':
-        specifier: 0.0.0-alpha.2
-        version: 0.0.0-alpha.2
+        specifier: 0.0.0-alpha.3
+        version: 0.0.0-alpha.3
       ai:
         specifier: ^7.0.58
         version: 7.0.85(zod@4.5.4)
@@ -449,8 +449,8 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@vercel/schedules@0.0.0-alpha.2':
-    resolution: {integrity: sha512-f2Xvtk27lrRNYQByhUmf3d8LIGpeO3HGsa/pzZnJEhc7gGL0HsPpW74Nf09FqC2B3AHGjn+yg07zabWXJrhWQw==}
+  '@vercel/schedules@0.0.0-alpha.3':
+    resolution: {integrity: sha512-8yLIGVZePPQk8s5tb1DmBflxNFou/PyaqWOik5gtCsxMqww8AaWavQP8fQlNEJ7B8n009C6V7a2ZvS8PA1YFBQ==}
     engines: {node: '>=20.0.0'}
 
   '@workflow/serde@4.1.0':
@@ -1210,7 +1210,7 @@ snapshots:
       mixpart: 0.0.6
       picocolors: 1.1.1
 
-  '@vercel/schedules@0.0.0-alpha.2':
+  '@vercel/schedules@0.0.0-alpha.3':
     dependencies:
       '@vercel/oidc': 3.8.5
 

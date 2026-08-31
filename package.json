@@ -12,7 +12,7 @@
     "@ai-sdk/gateway": "^4.0.46",
     "@vercel/blob": "^2.0.0",
     "@vercel/queue": "^0.5.1",
-    "@vercel/schedules": "0.0.0-alpha.2",
+    "@vercel/schedules": "0.0.0-alpha.3",
     "ai": "^7.0.58",
     "eve": "^0.47.3",
     "next": "16.3.0",

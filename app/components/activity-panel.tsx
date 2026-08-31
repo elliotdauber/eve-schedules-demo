@@ -169,6 +169,15 @@ export function ActivityPanel() {
                       <p className={styles.runAnswer}>{event.answer}</p>
                     ) : null}
                   </>
+                ) : event.message ? (
+                  <>
+                    <p className={styles.runName}>{event.message}</p>
+                    {event.payload !== undefined ? (
+                      <pre className={styles.payload}>
+                        {JSON.stringify(event.payload, null, 2)}
+                      </pre>
+                    ) : null}
+                  </>
                 ) : event.payload !== undefined ? (
                   <pre className={styles.payload}>
                     {JSON.stringify(event.payload, null, 2)}

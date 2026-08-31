@@ -37,10 +37,6 @@ function formatTime(value: string): string {
   });
 }
 
-function formatTimestamp(value: number): string {
-  return new Date(value).toLocaleString();
-}
-
 export function ActivityPanel() {
   const { tenantName, tenantNamespace } = useTenant();
   const tenantHeaders = useMemo(
@@ -63,28 +59,20 @@ export function ActivityPanel() {
   const events = activityPoll.data?.events ?? [];
   const blobConfigured = activityPoll.data?.blobConfigured ?? false;
 
-  const pollStatus =
-    schedulesPoll.error || activityPoll.error
-      ? 'error'
-      : schedulesPoll.loading
-        ? 'loading'
-        : 'live';
+  const lastUpdated = schedulesPoll.refreshedAt
+    ? formatTime(schedulesPoll.refreshedAt)
+    : null;
 
   return (
     <div className={styles.panel}>
       <div className={styles.panelHeader}>
         <div>
-          <h2 className={styles.panelTitle}>Schedules & activity</h2>
+          <h2 className={styles.panelTitle}>Schedules</h2>
           <p className={styles.panelHint}>
-            Scoped to <code>{tenantNamespace}</code> — polls schedules and blob
-            activity for your display name.
+            Namespace <code>{tenantNamespace}</code>
+            {lastUpdated ? ` · updated ${lastUpdated}` : null}
           </p>
         </div>
-        <span className={styles.pollStatus} data-status={pollStatus}>
-          {pollStatus === 'live' && schedulesPoll.refreshedAt
-            ? `Updated ${formatTime(schedulesPoll.refreshedAt)}`
-            : pollStatus}
-        </span>
       </div>
 
       {(schedulesPoll.error || activityPoll.error) && (
@@ -93,105 +81,74 @@ export function ActivityPanel() {
         </p>
       )}
 
-      <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{schedules.length}</span>
-          <span className={styles.statLabel}>Schedules</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{events.length}</span>
-          <span className={styles.statLabel}>Recent runs</span>
-        </div>
-      </div>
-
       <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Active schedules</h3>
         {schedulesPoll.loading && schedules.length === 0 ? (
-          <p className={styles.muted}>Loading schedules…</p>
+          <p className={styles.muted}>Loading…</p>
         ) : schedules.length === 0 ? (
-          <p className={styles.muted}>
-            No schedules yet. Ask the agent to create one.
-          </p>
+          <p className={styles.muted}>No schedules.</p>
         ) : (
-          <ul className={styles.scheduleList}>
-            {schedules.map(schedule => (
-              <li key={schedule.scheduleId} className={styles.scheduleItem}>
-                <div className={styles.scheduleRow}>
-                  <code className={styles.scheduleId}>{schedule.scheduleId}</code>
-                  <span
-                    className={styles.stateBadge}
-                    data-state={schedule.state}
-                  >
-                    {schedule.state}
-                  </span>
-                </div>
-                <p className={styles.scheduleExpr}>
-                  {formatExpression(schedule)}
-                </p>
-                {schedule.name ? (
-                  <p className={styles.scheduleName}>{schedule.name}</p>
-                ) : null}
-                <p className={styles.scheduleMeta}>
-                  topic <code>{schedule.target.topic}</code>
-                  {' · '}
-                  {formatTimestamp(schedule.createdAt)}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Expression</th>
+                  <th>Name</th>
+                  <th>State</th>
+                </tr>
+              </thead>
+              <tbody>
+                {schedules.map(schedule => (
+                  <tr key={schedule.scheduleId}>
+                    <td>
+                      <code>{formatExpression(schedule)}</code>
+                    </td>
+                    <td>{schedule.name || '—'}</td>
+                    <td>{schedule.state}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
       <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Recent activity</h3>
+        <h3 className={styles.sectionTitle}>Recent runs</h3>
         {!blobConfigured && (
-          <p className={styles.blobHint}>
-            Connect a Vercel Blob store to this project for persistent run
-            history. Auth uses OIDC automatically — no read-write token needed.
+          <p className={styles.note}>
+            Connect a Blob store to persist run history across invocations.
           </p>
         )}
         {events.length === 0 ? (
-          <p className={styles.muted}>
-            {blobConfigured
-              ? 'No runs recorded yet.'
-              : 'Runs are logged to the console until Blob is configured.'}
-          </p>
+          <p className={styles.muted}>No runs yet.</p>
         ) : (
-          <div className={styles.timeline}>
+          <ul className={styles.runList}>
             {events.map(event => (
-              <article key={event.id} className={styles.event}>
-                <div className={styles.eventHeader}>
-                  <span
-                    className={styles.eventKind}
-                    data-type={event.type}
-                  >
-                    {event.type === 'prompt' ? 'AI prompt' : 'Queue job'}
-                  </span>
-                  <time>{formatTime(event.receivedAt)}</time>
+              <li key={event.id} className={styles.runItem}>
+                <div className={styles.runMeta}>
+                  <span>{formatTime(event.receivedAt)}</span>
+                  <span>{event.type === 'prompt' ? 'prompt' : 'job'}</span>
+                  {event.scheduleId ? (
+                    <code>{event.scheduleId}</code>
+                  ) : null}
                 </div>
-                {event.scheduleId ? (
-                  <code className={styles.eventScheduleId}>
-                    {event.scheduleId}
-                  </code>
-                ) : null}
-                {event.scheduleName ? (
-                  <p className={styles.eventName}>{event.scheduleName}</p>
-                ) : null}
                 {event.type === 'prompt' && event.prompt ? (
                   <>
-                    <p className={styles.promptText}>{event.prompt}</p>
+                    <p className={styles.runPrompt}>{event.prompt}</p>
                     {event.answer ? (
-                      <p className={styles.answerText}>{event.answer}</p>
+                      <p className={styles.runAnswer}>{event.answer}</p>
                     ) : null}
                   </>
                 ) : event.payload !== undefined ? (
                   <pre className={styles.payload}>
                     {JSON.stringify(event.payload, null, 2)}
                   </pre>
+                ) : event.scheduleName ? (
+                  <p className={styles.runName}>{event.scheduleName}</p>
                 ) : null}
-              </article>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </section>
     </div>

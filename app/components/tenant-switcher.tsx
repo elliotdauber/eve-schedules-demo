@@ -42,7 +42,7 @@ export function TenantSwitcher() {
           setOpen(current => !current);
         }}
       >
-        <span className={styles.label}>Tenant</span>
+        <span className={styles.label}>as</span>
         <code className={styles.name}>{tenantName}</code>
       </button>
 
@@ -77,7 +77,7 @@ export function TenantSwitcher() {
               Cancel
             </button>
             <button type="submit" className={styles.primary}>
-              Switch tenant
+              Save
             </button>
           </div>
         </form>

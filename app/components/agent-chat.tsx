@@ -8,7 +8,7 @@ import styles from './agent-chat.module.css';
 
 const SUGGESTIONS = [
   'List all my schedules',
-  'Create a job named "heartbeat" that runs every minute',
+  'Create a job named heartbeat that runs every minute',
   'In 30 seconds, tell me a fun fact about the moon',
   'Delete a schedule — show me what exists first',
 ];
@@ -30,20 +30,16 @@ function MessagePart({
   }
 
   if (part.type === 'dynamic-tool') {
-    const isDone = part.state === 'output-available';
     return (
-      <div className={styles.toolCall} data-done={isDone}>
+      <div className={styles.toolCall}>
         <div className={styles.toolHeader}>
-          <span className={styles.toolIcon} aria-hidden>
-            {isDone ? '✓' : '⚡'}
-          </span>
           <span className={styles.toolName}>{part.toolName}</span>
           {part.state ? (
             <span className={styles.toolState}>{part.state}</span>
           ) : null}
         </div>
         {part.input !== undefined ? (
-          <details className={styles.toolDetails} open={!isDone}>
+          <details className={styles.toolDetails}>
             <summary>Input</summary>
             <pre className={styles.toolPayload}>
               {JSON.stringify(part.input, null, 2)}
@@ -83,8 +79,7 @@ function formatAgentError(error: Error): string {
     message.includes('This page could not be found')
   ) {
     return (
-      'Eve agent unavailable — /eve/v1/session returned 404. ' +
-      'Run with Node.js 24+ via `pnpm dev:vc`.'
+      'Eve agent unavailable. Run with Node.js 24+ via `pnpm dev:vc`.'
     );
   }
 
@@ -113,13 +108,7 @@ function AgentChatSession({ tenantName }: { tenantName: string }) {
   return (
     <div className={styles.chat}>
       <div className={styles.chatHeader}>
-        <div>
-          <h2 className={styles.chatTitle}>Schedule assistant</h2>
-          <p className={styles.chatHint}>
-            All schedule CRUD goes through agent tools. The panel on the right
-            polls the Schedules API for the current state.
-          </p>
-        </div>
+        <h2 className={styles.chatTitle}>Agent</h2>
         <span className={styles.statusBadge} data-status={agent.status}>
           {agent.status}
         </span>
@@ -134,20 +123,21 @@ function AgentChatSession({ tenantName }: { tenantName: string }) {
       <div className={styles.messages} aria-live="polite">
         {agent.data.messages.length === 0 ? (
           <div className={styles.emptyState}>
-            <p className={styles.emptyTitle}>Try one of these</p>
-            <div className={styles.suggestions}>
+            <p className={styles.emptyTitle}>Examples</p>
+            <ul className={styles.suggestions}>
               {SUGGESTIONS.map(suggestion => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  className={styles.suggestionChip}
-                  disabled={isBusy}
-                  onClick={() => void agent.send(suggestion)}
-                >
-                  {suggestion}
-                </button>
+                <li key={suggestion}>
+                  <button
+                    type="button"
+                    className={styles.suggestionLink}
+                    disabled={isBusy}
+                    onClick={() => void agent.send(suggestion)}
+                  >
+                    {suggestion}
+                  </button>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         ) : (
           agent.data.messages.map(message => (
@@ -157,7 +147,7 @@ function AgentChatSession({ tenantName }: { tenantName: string }) {
               data-role={message.role}
             >
               <header className={styles.messageRole}>
-                {message.role === 'user' ? 'You' : 'Agent'}
+                {message.role === 'user' ? 'You' : 'Assistant'}
               </header>
               <div className={styles.messageBody}>
                 {message.parts.map((part, index) => (
@@ -186,8 +176,8 @@ function AgentChatSession({ tenantName }: { tenantName: string }) {
         <textarea
           name="message"
           className={styles.input}
-          placeholder="Create a cron job, schedule a prompt, list schedules…"
-          rows={2}
+          placeholder="Message the agent…"
+          rows={3}
           disabled={isBusy}
         />
         <div className={styles.composerActions}>
@@ -197,14 +187,14 @@ function AgentChatSession({ tenantName }: { tenantName: string }) {
             disabled={isBusy}
             onClick={() => agent.reset()}
           >
-            New chat
+            Clear
           </button>
           <button
             type="submit"
             className={styles.button}
             disabled={isBusy}
           >
-            {isBusy ? 'Working…' : 'Send'}
+            {isBusy ? 'Sending…' : 'Send'}
           </button>
         </div>
       </form>

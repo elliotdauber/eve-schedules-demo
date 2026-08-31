@@ -4,7 +4,7 @@ A Next.js + [Eve](https://eve.dev) demo for **Vercel Schedules** (`@vercel/sched
 
 ## Multi-tenant demo
 
-On first load, pick a **display name**. Schedules are created in namespace `user:your-name` and activity is stored under `tenants/your-name/activity/` in Blob.
+On first load, pick a **display name**. Schedules are created in namespace `user.your-name` and activity is stored under `tenants/your-name/activity/` in Blob.
 
 **This is not secure isolation** — anyone who enters the same name shares that namespace and can see or delete those schedules. Change your display name anytime from the header; it resets the agent session and switches context.
 

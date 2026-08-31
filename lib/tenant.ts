@@ -21,15 +21,17 @@ export function normalizeTenantName(raw: string): string {
   return normalized;
 }
 
+const NAMESPACE_PREFIX = 'user.';
+
 export function tenantNamespace(tenantName: string): string {
-  return `user:${normalizeTenantName(tenantName)}`;
+  return `${NAMESPACE_PREFIX}${normalizeTenantName(tenantName)}`;
 }
 
 export function tenantSlugFromNamespace(namespace: string): string | null {
-  if (!namespace.startsWith('user:')) {
+  if (!namespace.startsWith(NAMESPACE_PREFIX)) {
     return null;
   }
-  const slug = namespace.slice('user:'.length);
+  const slug = namespace.slice(NAMESPACE_PREFIX.length);
   return slug.length > 0 ? slug : null;
 }
 

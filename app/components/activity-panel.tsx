@@ -37,6 +37,32 @@ function formatTime(value: string): string {
   });
 }
 
+function formatPollError(error: string | null): string | null {
+  if (!error) {
+    return null;
+  }
+
+  try {
+    const outer = JSON.parse(error) as { error?: string };
+    if (typeof outer.error === 'string') {
+      try {
+        const inner = JSON.parse(outer.error) as {
+          error?: { message?: string };
+        };
+        if (inner.error?.message) {
+          return inner.error.message;
+        }
+      } catch {
+        return outer.error;
+      }
+    }
+  } catch {
+    // fall through
+  }
+
+  return error;
+}
+
 export function ActivityPanel() {
   const { tenantName, tenantNamespace } = useTenant();
   const tenantHeaders = useMemo(
@@ -63,6 +89,10 @@ export function ActivityPanel() {
     ? formatTime(schedulesPoll.refreshedAt)
     : null;
 
+  const pollError = formatPollError(
+    schedulesPoll.error ?? activityPoll.error
+  );
+
   return (
     <div className={styles.panel}>
       <div className={styles.panelHeader}>
@@ -75,9 +105,9 @@ export function ActivityPanel() {
         </div>
       </div>
 
-      {(schedulesPoll.error || activityPoll.error) && (
+      {pollError && (
         <p className={styles.error} role="alert">
-          {schedulesPoll.error ?? activityPoll.error}
+          {pollError}
         </p>
       )}
 

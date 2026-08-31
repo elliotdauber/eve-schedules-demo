@@ -40,7 +40,7 @@ export function TenantGate({ children }: { children: React.ReactNode }) {
         <h1 className={styles.title}>Choose a display name</h1>
         <p className={styles.lead}>
           Your schedules are grouped under{' '}
-          <code className={styles.inlineCode}>user:your-name</code>. Activity
+          <code className={styles.inlineCode}>user.your-name</code>. Activity
           logs are stored in a matching blob folder.
         </p>
         <div className={styles.warning} role="note">

@@ -6,6 +6,7 @@ import {
   DEFAULT_QUEUE_TOPIC,
   encodePromptName,
 } from '@/lib/constants';
+import { toScheduleSummary } from '@/lib/schedule-present';
 import { getScheduleInNamespace } from '@/lib/schedules-tenant';
 import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
 
@@ -50,7 +51,7 @@ function whenToExpression(
 
 export default defineTool({
   description:
-    'Schedule an AI prompt to run when the schedule fires. Use cron for recurring prompts, single/at for a fixed time, or delay for relative times like 1m or 30s. Answers appear in the activity panel.',
+    'Schedule an AI prompt to run later or on a cron. Use delay for relative times like 1m or 30s. Answers appear in the activity panel.',
   inputSchema: z.object({
     prompt: z.string().min(1),
     when: whenSchema,
@@ -71,10 +72,8 @@ export default defineTool({
     const schedule = await getScheduleInNamespace(result.scheduleId, namespace);
 
     return {
-      scheduleId: result.scheduleId,
-      namespace,
-      schedule,
-      note: 'When this schedule fires, the AI answer will appear in the activity panel.',
+      schedule: toScheduleSummary(schedule),
+      note: 'The answer will appear in the activity panel when the schedule runs.',
     };
   },
 });

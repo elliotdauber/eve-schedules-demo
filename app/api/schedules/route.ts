@@ -1,9 +1,17 @@
 import { Schedules } from '@vercel/schedules';
+import {
+  getTenantNameFromRequest,
+  getTenantNamespaceFromRequest,
+} from '@/lib/tenant';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const result = await Schedules.list();
+    const namespace = getTenantNamespaceFromRequest(request);
+    const tenantName = getTenantNameFromRequest(request);
+    const result = await Schedules.list({ namespace });
     return Response.json({
+      tenantName,
+      namespace,
       schedules: result.data,
       count: result.data.length,
       cursor: result.cursor,
@@ -11,6 +19,7 @@ export async function GET() {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Failed to list schedules';
-    return Response.json({ error: message }, { status: 500 });
+    const status = message.includes('Missing tenant') ? 400 : 500;
+    return Response.json({ error: message }, { status });
   }
 }

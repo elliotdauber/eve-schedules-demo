@@ -6,6 +6,8 @@ import {
   DEFAULT_QUEUE_TOPIC,
   encodePromptName,
 } from '@/lib/constants';
+import { getScheduleInNamespace } from '@/lib/schedules-tenant';
+import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
 
 const whenSchema = z.discriminatedUnion('type', [
   z.object({
@@ -54,20 +56,23 @@ export default defineTool({
     when: whenSchema,
     name: z.string().optional(),
   }),
-  async execute({ prompt, when, name }) {
+  async execute({ prompt, when, name }, ctx) {
+    const namespace = getTenantNamespaceFromContext(ctx);
     const expression = whenToExpression(when);
     const scheduleName = name ?? encodePromptName(prompt);
 
     const result = await Schedules.create({
       expression,
       target: { topic: DEFAULT_QUEUE_TOPIC },
+      namespace,
       name: scheduleName,
     });
 
-    const schedule = await Schedules.get(result.scheduleId);
+    const schedule = await getScheduleInNamespace(result.scheduleId, namespace);
 
     return {
       scheduleId: result.scheduleId,
+      namespace,
       schedule,
       note: 'When this schedule fires, the AI answer will appear in the activity panel.',
     };

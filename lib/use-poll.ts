@@ -9,7 +9,16 @@ type PollState<T> = {
   refreshedAt: string | null;
 };
 
-export function usePoll<T>(url: string, intervalMs = 5000): PollState<T> {
+type PollOptions = {
+  intervalMs?: number;
+  headers?: Record<string, string>;
+  enabled?: boolean;
+};
+
+export function usePoll<T>(
+  url: string,
+  { intervalMs = 5000, headers, enabled = true }: PollOptions = {}
+): PollState<T> {
   const [state, setState] = useState<PollState<T>>({
     data: null,
     error: null,
@@ -17,9 +26,18 @@ export function usePoll<T>(url: string, intervalMs = 5000): PollState<T> {
     refreshedAt: null,
   });
 
+  const headerKey = JSON.stringify(headers ?? {});
+
   const fetchData = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     try {
-      const response = await fetch(url, { cache: 'no-store' });
+      const response = await fetch(url, {
+        cache: 'no-store',
+        headers,
+      });
       if (!response.ok) {
         throw new Error(await response.text());
       }
@@ -37,13 +55,18 @@ export function usePoll<T>(url: string, intervalMs = 5000): PollState<T> {
         loading: false,
       }));
     }
-  }, [url]);
+  }, [url, enabled, headerKey]);
 
   useEffect(() => {
+    if (!enabled) {
+      setState(current => ({ ...current, loading: false }));
+      return;
+    }
+
     void fetchData();
     const timer = setInterval(() => void fetchData(), intervalMs);
     return () => clearInterval(timer);
-  }, [fetchData, intervalMs]);
+  }, [fetchData, intervalMs, enabled]);
 
   return state;
 }

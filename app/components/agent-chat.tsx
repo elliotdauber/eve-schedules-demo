@@ -1,6 +1,9 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useEveAgent } from 'eve/react';
+import { useTenant } from '@/lib/tenant-context';
+import { TENANT_HEADER } from '@/lib/tenant';
 import styles from './agent-chat.module.css';
 
 const SUGGESTIONS = [
@@ -89,7 +92,21 @@ function formatAgentError(error: Error): string {
 }
 
 export function AgentChat() {
-  const agent = useEveAgent();
+  const { tenantName } = useTenant();
+
+  if (!tenantName) {
+    return null;
+  }
+
+  return <AgentChatSession key={tenantName} tenantName={tenantName} />;
+}
+
+function AgentChatSession({ tenantName }: { tenantName: string }) {
+  const tenantHeaders = useMemo(
+    () => ({ [TENANT_HEADER]: tenantName }),
+    [tenantName]
+  );
+  const agent = useEveAgent({ headers: tenantHeaders });
   const isBusy =
     agent.status === 'submitted' || agent.status === 'streaming';
 

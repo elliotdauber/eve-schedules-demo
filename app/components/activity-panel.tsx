@@ -1,16 +1,22 @@
 'use client';
 
+import { useMemo } from 'react';
 import type { Schedule } from '@vercel/schedules';
 import type { ActivityRecord } from '@/lib/activity-log';
 import { usePoll } from '@/lib/use-poll';
+import { useTenant } from '@/lib/tenant-context';
+import { TENANT_HEADER } from '@/lib/tenant';
 import styles from './activity-panel.module.css';
 
 type SchedulesResponse = {
+  tenantName: string;
+  namespace: string;
   schedules: Schedule[];
   count: number;
 };
 
 type ActivityResponse = {
+  tenantName: string;
   events: ActivityRecord[];
   count: number;
   blobConfigured: boolean;
@@ -36,8 +42,22 @@ function formatTimestamp(value: number): string {
 }
 
 export function ActivityPanel() {
-  const schedulesPoll = usePoll<SchedulesResponse>('/api/schedules', 5000);
-  const activityPoll = usePoll<ActivityResponse>('/api/activity', 4000);
+  const { tenantName, tenantNamespace } = useTenant();
+  const tenantHeaders = useMemo(
+    () => (tenantName ? { [TENANT_HEADER]: tenantName } : undefined),
+    [tenantName]
+  );
+
+  const schedulesPoll = usePoll<SchedulesResponse>('/api/schedules', {
+    intervalMs: 5000,
+    headers: tenantHeaders,
+    enabled: Boolean(tenantName),
+  });
+  const activityPoll = usePoll<ActivityResponse>('/api/activity', {
+    intervalMs: 4000,
+    headers: tenantHeaders,
+    enabled: Boolean(tenantName),
+  });
 
   const schedules = schedulesPoll.data?.schedules ?? [];
   const events = activityPoll.data?.events ?? [];
@@ -56,7 +76,8 @@ export function ActivityPanel() {
         <div>
           <h2 className={styles.panelTitle}>Schedules & activity</h2>
           <p className={styles.panelHint}>
-            Polls the Schedules API and activity log — works on serverless.
+            Scoped to <code>{tenantNamespace}</code> — polls schedules and blob
+            activity for your display name.
           </p>
         </div>
         <span className={styles.pollStatus} data-status={pollStatus}>

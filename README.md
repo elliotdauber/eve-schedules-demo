@@ -2,6 +2,12 @@
 
 A Next.js + [Eve](https://eve.dev) demo for **Vercel Schedules** (`@vercel/schedules@0.0.0-alpha.2`). Chat with an AI agent to create cron jobs and one-shot tasks — schedules and run history display via HTTP polling, designed for Vercel serverless.
 
+## Multi-tenant demo
+
+On first load, pick a **display name**. Schedules are created in namespace `user:your-name` and activity is stored under `tenants/your-name/activity/` in Blob.
+
+**This is not secure isolation** — anyone who enters the same name shares that namespace and can see or delete those schedules. Change your display name anytime from the header; it resets the agent session and switches context.
+
 ## Features
 
 - **Chat-first UI** — create, list, get, and delete schedules via Eve agent tools

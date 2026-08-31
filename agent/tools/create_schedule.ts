@@ -2,6 +2,8 @@ import { Schedules } from '@vercel/schedules';
 import { defineTool } from 'eve/tools';
 import { z } from 'zod';
 import { DEFAULT_QUEUE_TOPIC } from '@/lib/constants';
+import { getScheduleInNamespace } from '@/lib/schedules-tenant';
+import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
 
 const expressionSchema = z.discriminatedUnion('type', [
   z.object({
@@ -28,16 +30,19 @@ export default defineTool({
       .default(DEFAULT_QUEUE_TOPIC)
       .describe('Queue topic the schedule publishes to'),
   }),
-  async execute({ expression, name, topic }) {
+  async execute(input, ctx) {
+    const namespace = getTenantNamespaceFromContext(ctx);
     const result = await Schedules.create({
-      expression,
-      target: { topic },
-      ...(name ? { name } : {}),
+      expression: input.expression,
+      target: { topic: input.topic },
+      namespace,
+      ...(input.name ? { name: input.name } : {}),
     });
-    const schedule = await Schedules.get(result.scheduleId);
+    const schedule = await getScheduleInNamespace(result.scheduleId, namespace);
 
     return {
       scheduleId: result.scheduleId,
+      namespace,
       schedule,
     };
   },

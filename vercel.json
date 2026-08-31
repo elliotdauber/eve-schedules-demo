@@ -1,0 +1,13 @@
+{
+  "framework": "nextjs",
+  "functions": {
+    "app/api/queues/schedule-jobs/route.ts": {
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "schedule-jobs"
+        }
+      ]
+    }
+  }
+}

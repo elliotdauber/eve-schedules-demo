@@ -1,0 +1,276 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.25rem 1.25rem 1.5rem;
+  background: rgba(17, 17, 19, 0.5);
+  overflow-y: auto;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.panelTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.panelHint {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  max-width: 18rem;
+}
+
+.pollStatus {
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  white-space: nowrap;
+}
+
+.pollStatus[data-status='live'] {
+  color: var(--success);
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.pollStatus[data-status='error'] {
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.error {
+  margin-bottom: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: #fca5a5;
+  font-size: 0.8125rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem;
+  margin-bottom: 1rem;
+}
+
+.stat {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+}
+
+.statValue {
+  display: block;
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.statLabel {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+}
+
+.section {
+  margin-bottom: 1.25rem;
+}
+
+.sectionTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.625rem;
+}
+
+.muted {
+  font-size: 0.8125rem;
+  color: var(--text-faint);
+}
+
+.blobHint {
+  font-size: 0.75rem;
+  color: var(--warning);
+  background: var(--warning-soft);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.625rem;
+  margin-bottom: 0.625rem;
+}
+
+.scheduleList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.scheduleItem {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+}
+
+.scheduleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+
+.scheduleId {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stateBadge {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.stateBadge[data-state='active'] {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.stateBadge[data-state='inactive'] {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-faint);
+}
+
+.scheduleExpr {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.8125rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.scheduleName {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.scheduleMeta {
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.event {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+}
+
+.eventHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+
+.eventKind {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+}
+
+.eventKind[data-type='job'] {
+  background: var(--queue-soft);
+  color: var(--queue);
+}
+
+.eventKind[data-type='prompt'] {
+  background: var(--prompt-soft);
+  color: var(--prompt);
+}
+
+.eventHeader time {
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+}
+
+.eventScheduleId {
+  display: block;
+  font-size: 0.625rem;
+  color: var(--text-faint);
+  margin-bottom: 0.25rem;
+}
+
+.eventName {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.375rem;
+}
+
+.promptText {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.375rem;
+  line-height: 1.45;
+}
+
+.promptText::before {
+  content: 'Q · ';
+  color: var(--prompt);
+  font-weight: 600;
+}
+
+.answerText {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.payload {
+  margin: 0;
+  padding: 0.5rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.625rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+}

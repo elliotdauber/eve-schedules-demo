@@ -1,5 +1,4 @@
 import { handleCallback } from '@vercel/queue';
-import { Schedules } from '@vercel/schedules';
 import { recordActivity } from '@/lib/activity-log';
 import { decodePromptName } from '@/lib/constants';
 import { runScheduledPrompt } from '@/lib/run-scheduled-prompt';
@@ -11,36 +10,22 @@ import { tenantSlugFromNamespace } from '@/lib/tenant';
 
 export type ScheduleQueueMessage = {
   scheduleId: string;
-  name?: string;
-  namespace?: string;
-  trackId?: string;
+  name: string;
+  namespace: string;
   firedAt?: string;
   source?: string;
   payload?: unknown;
 };
 
-async function resolveTenantName(
-  message: ScheduleQueueMessage
-): Promise<string | null> {
-  if (message.namespace) {
-    return tenantSlugFromNamespace(message.namespace);
-  }
-
-  if (!message.scheduleId) {
+function resolveTenantName(message: ScheduleQueueMessage): string | null {
+  if (!message.namespace) {
     return null;
   }
 
-  try {
-    const schedule = await Schedules.get(message.scheduleId);
-    return tenantSlugFromNamespace(schedule.namespace);
-  } catch {
-    return null;
-  }
+  return tenantSlugFromNamespace(message.namespace);
 }
 
-function resolvePrompt(
-  message: ScheduleQueueMessage
-): string | null {
+function resolvePrompt(message: ScheduleQueueMessage): string | null {
   if (isPromptPayload(message.payload)) {
     return message.payload.prompt;
   }
@@ -49,7 +34,7 @@ function resolvePrompt(
 }
 
 export const POST = handleCallback(async (message: ScheduleQueueMessage) => {
-  const tenantName = await resolveTenantName(message);
+  const tenantName = resolveTenantName(message);
 
   if (!tenantName) {
     console.warn('[schedule fired] missing tenant namespace', message);
@@ -72,6 +57,7 @@ export const POST = handleCallback(async (message: ScheduleQueueMessage) => {
       '[scheduled prompt]',
       tenantName,
       message.scheduleId,
+      message.name,
       prompt,
       answer
     );

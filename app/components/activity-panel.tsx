@@ -158,7 +158,9 @@ export function ActivityPanel() {
                 <div className={styles.runMeta}>
                   <span>{formatTime(event.receivedAt)}</span>
                   <span>{event.type === 'prompt' ? 'prompt' : 'job'}</span>
-                  {event.scheduleId ? (
+                  {event.scheduleName ? (
+                    <code>{event.scheduleName}</code>
+                  ) : event.scheduleId ? (
                     <code>{event.scheduleId}</code>
                   ) : null}
                 </div>

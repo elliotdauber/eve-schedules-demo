@@ -5,13 +5,13 @@ import { getScheduleInNamespace } from '@/lib/schedules-tenant';
 import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
 
 export default defineTool({
-  description: 'Get a single schedule by ID.',
+  description: 'Get a single schedule by name.',
   inputSchema: z.object({
-    scheduleId: z.string().min(1),
+    name: z.string().min(1),
   }),
-  async execute({ scheduleId }, ctx) {
+  async execute({ name }, ctx) {
     const namespace = getTenantNamespaceFromContext(ctx);
-    const schedule = await getScheduleInNamespace(scheduleId, namespace);
+    const schedule = await getScheduleInNamespace(name, namespace);
     return { schedule: toScheduleSummary(schedule) };
   },
 });

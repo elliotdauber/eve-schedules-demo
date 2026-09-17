@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { DEFAULT_QUEUE_TOPIC } from '@/lib/constants';
 import { createPromptPayload } from '@/lib/schedule-payload';
 import { toScheduleSummary } from '@/lib/schedule-present';
-import { getScheduleInNamespace } from '@/lib/schedules-tenant';
+import { defaultScheduleName } from '@/lib/schedules-tenant';
 import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
 
 const whenSchema = z.discriminatedUnion('type', [
@@ -60,15 +60,13 @@ export default defineTool({
     const expression = whenToExpression(when);
     const payload = createPromptPayload(prompt);
 
-    const result = await Schedules.create({
+    const schedule = await Schedules.create({
+      name: name ?? defaultScheduleName('scheduled-prompt'),
       expression,
       target: { topic: DEFAULT_QUEUE_TOPIC },
       namespace,
-      name: name ?? 'Scheduled prompt',
       payload,
     });
-
-    const schedule = await getScheduleInNamespace(result.scheduleId, namespace);
 
     return {
       schedule: toScheduleSummary(schedule, payload),

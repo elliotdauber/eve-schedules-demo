@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { DEFAULT_QUEUE_TOPIC } from '@/lib/constants';
 import { createJobPayload } from '@/lib/schedule-payload';
 import { toScheduleSummary } from '@/lib/schedule-present';
-import { getScheduleInNamespace } from '@/lib/schedules-tenant';
+import { defaultScheduleName } from '@/lib/schedules-tenant';
 import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
 
 const expressionSchema = z.discriminatedUnion('type', [
@@ -40,14 +40,13 @@ export default defineTool({
       ? createJobPayload(input.payload)
       : undefined;
 
-    const result = await Schedules.create({
+    const schedule = await Schedules.create({
+      name: input.name ?? defaultScheduleName('job'),
       expression: input.expression,
       target: { topic: DEFAULT_QUEUE_TOPIC },
       namespace,
-      ...(input.name ? { name: input.name } : {}),
       ...(payload ? { payload } : {}),
     });
-    const schedule = await getScheduleInNamespace(result.scheduleId, namespace);
 
     return {
       schedule: toScheduleSummary(schedule, payload),

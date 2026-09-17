@@ -5,14 +5,14 @@ import { getScheduleInNamespace } from '@/lib/schedules-tenant';
 import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
 
 export default defineTool({
-  description: 'Permanently delete a schedule by ID.',
+  description: 'Permanently delete a schedule by name.',
   inputSchema: z.object({
-    scheduleId: z.string().min(1),
+    name: z.string().min(1),
   }),
-  async execute({ scheduleId }, ctx) {
+  async execute({ name }, ctx) {
     const namespace = getTenantNamespaceFromContext(ctx);
-    await getScheduleInNamespace(scheduleId, namespace);
-    await Schedules.delete(scheduleId);
-    return { scheduleId, deleted: true };
+    await getScheduleInNamespace(name, namespace);
+    await Schedules.delete({ name, namespace });
+    return { name, deleted: true };
   },
 });

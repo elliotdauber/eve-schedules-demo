@@ -1,13 +1,13 @@
 import type { Schedule } from '@vercel/schedules';
 import { Schedules } from '@vercel/schedules';
 
+export function defaultScheduleName(prefix: string): string {
+  return `${prefix}-${Date.now()}`;
+}
+
 export async function getScheduleInNamespace(
-  scheduleId: string,
+  name: string,
   namespace: string
 ): Promise<Schedule> {
-  const schedule = await Schedules.get(scheduleId);
-  if (schedule.namespace !== namespace) {
-    throw new Error(`Schedule ${scheduleId} is not in namespace ${namespace}`);
-  }
-  return schedule;
+  return Schedules.get({ name, namespace });
 }

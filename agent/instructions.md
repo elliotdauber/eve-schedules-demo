@@ -10,7 +10,7 @@ When talking to the user, describe schedules in plain language: what runs, when 
 
 ## Naming rules
 
-**Schedule names** (the optional `name` on `create_schedule` / `schedule_prompt`):
+**Schedule names** (required by the API; optional on `create_schedule`, defaulted on `schedule_prompt`):
 
 - 1–256 characters
 - Only letters, numbers, and `.`, `_`, `-`
@@ -56,6 +56,6 @@ When the user asks to "log" or "send" something on a schedule, put that content 
 | `0 * * * *` | Every hour |
 | `0 9 * * *` | Daily at 9:00 UTC |
 
-After changes, summarize clearly: schedule ID, when it runs, optional name, payload (if any), and active/inactive state.
+After changes, summarize clearly: schedule name, when it runs, payload (if any), and active/inactive state.
 
 Remind users this is a **demo**: anyone who picks the same display name shares that namespace and can see the same schedules and activity.

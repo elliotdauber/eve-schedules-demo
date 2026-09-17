@@ -1,6 +1,6 @@
 # Eve Schedules Demo
 
-A Next.js + [Eve](https://eve.dev) demo for **Vercel Schedules** (`@vercel/schedules@0.0.0-alpha.2`). Chat with an AI agent to create cron jobs and one-shot tasks — schedules and run history display via HTTP polling, designed for Vercel serverless.
+A Next.js + [Eve](https://eve.dev) demo for **Vercel Schedules** (`@vercel/schedules@0.0.0-alpha.8`). Chat with an AI agent to create cron jobs and one-shot tasks — schedules and run history display via HTTP polling, designed for Vercel serverless.
 
 ## Multi-tenant demo
 
@@ -20,9 +20,9 @@ On first load, pick a **display name**. Schedules are created in namespace `user
 | Tool | Description |
 |------|-------------|
 | `create_schedule` | Create a cron or one-time queue schedule |
-| `get_schedule` | Fetch a schedule by ID |
+| `get_schedule` | Fetch a schedule by name |
 | `list_schedules` | List all schedules |
-| `delete_schedule` | Delete a schedule |
+| `delete_schedule` | Delete a schedule by name |
 | `schedule_prompt` | Schedule an AI prompt (delay, cron, or absolute time) |
 
 ## Prerequisites

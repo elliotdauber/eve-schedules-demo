@@ -13,7 +13,7 @@ export default function Home() {
       <div className={styles.shell}>
         <header className={styles.header}>
           <div className={styles.brand}>
-            <h1 className={styles.title}>Eve Schedules Demo</h1>
+            <h1 className={styles.title}>Scheduler</h1>
             <p className={styles.tagline}>
               Manage cron and one-shot schedules via the agent
             </p>

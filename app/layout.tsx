@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Eve Schedules Demo',
+  title: 'Scheduler',
   description:
     'Chat with an Eve agent to create cron jobs and timed tasks on Vercel Schedules',
 };

@@ -6,7 +6,11 @@ import { DEFAULT_QUEUE_TOPIC } from '@/lib/constants';
 import { createPromptPayload } from '@/lib/schedule-payload';
 import { toScheduleSummary } from '@/lib/schedule-present';
 import { defaultScheduleName } from '@/lib/schedules-tenant';
-import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
+import { formatLocalScheduleTime } from '@/lib/schedule-timezone';
+import {
+  getScheduleTimezoneFromContext,
+  getTenantNamespaceFromContext,
+} from '@/lib/tool-tenant';
 
 const whenSchema = z.discriminatedUnion('type', [
   z.object({
@@ -15,7 +19,12 @@ const whenSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('single'),
-    at: z.string().min(1),
+    at: z
+      .string()
+      .min(1)
+      .describe(
+        'Local datetime YYYY-MM-DDTHH:mm in the schedule timezone (no Z suffix)'
+      ),
   }),
   z.object({
     type: z.literal('delay'),
@@ -26,7 +35,8 @@ const whenSchema = z.discriminatedUnion('type', [
 ]);
 
 function whenToExpression(
-  when: z.infer<typeof whenSchema>
+  when: z.infer<typeof whenSchema>,
+  timezone: string
 ): ScheduleExpression {
   if (when.type === 'delay') {
     const match = /^(\d+)(s|m|h|d)$/.exec(when.duration);
@@ -37,9 +47,12 @@ function whenToExpression(
     const amount = Number(match[1]);
     const unit = match[2];
     const multipliers = { s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000 };
-    const at = new Date(
-      Date.now() + amount * multipliers[unit as keyof typeof multipliers]
-    ).toISOString();
+    const at = formatLocalScheduleTime(
+      new Date(
+        Date.now() + amount * multipliers[unit as keyof typeof multipliers]
+      ),
+      timezone
+    );
 
     return { type: 'single', at };
   }
@@ -57,12 +70,14 @@ export default defineTool({
   }),
   async execute({ prompt, when, name }, ctx) {
     const namespace = getTenantNamespaceFromContext(ctx);
-    const expression = whenToExpression(when);
+    const timezone = getScheduleTimezoneFromContext(ctx);
+    const expression = whenToExpression(when, timezone);
     const payload = createPromptPayload(prompt);
 
     const schedule = await Schedules.create({
       name: name ?? defaultScheduleName('scheduled-prompt'),
       expression,
+      timezone,
       target: { topic: DEFAULT_QUEUE_TOPIC },
       namespace,
       payload,

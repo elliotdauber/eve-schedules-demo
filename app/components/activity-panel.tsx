@@ -3,9 +3,10 @@
 import { useMemo } from 'react';
 import type { Schedule } from '@vercel/schedules';
 import type { ActivityRecord } from '@/lib/activity-log';
+import { buildTenantRequestHeaders } from '@/lib/request-headers';
+import { formatExpression } from '@/lib/schedule-present';
 import { usePoll } from '@/lib/use-poll';
 import { useTenant } from '@/lib/tenant-context';
-import { TENANT_HEADER } from '@/lib/tenant';
 import styles from './activity-panel.module.css';
 
 type SchedulesResponse = {
@@ -21,13 +22,6 @@ type ActivityResponse = {
   count: number;
   blobConfigured: boolean;
 };
-
-function formatExpression(schedule: Schedule): string {
-  if (schedule.expression.type === 'cron') {
-    return schedule.expression.cron;
-  }
-  return schedule.expression.at;
-}
 
 function formatTime(value: string): string {
   return new Date(value).toLocaleTimeString(undefined, {
@@ -64,10 +58,11 @@ function formatPollError(error: string | null): string | null {
 }
 
 export function ActivityPanel() {
-  const { tenantName, tenantNamespace } = useTenant();
+  const { tenantName, tenantNamespace, timezone } = useTenant();
   const tenantHeaders = useMemo(
-    () => (tenantName ? { [TENANT_HEADER]: tenantName } : undefined),
-    [tenantName]
+    () =>
+      tenantName ? buildTenantRequestHeaders(tenantName, timezone) : undefined,
+    [tenantName, timezone]
   );
 
   const schedulesPoll = usePoll<SchedulesResponse>('/api/schedules', {
@@ -122,6 +117,7 @@ export function ActivityPanel() {
               <thead>
                 <tr>
                   <th>Expression</th>
+                  <th>Timezone</th>
                   <th>Name</th>
                   <th>State</th>
                 </tr>
@@ -130,8 +126,9 @@ export function ActivityPanel() {
                 {schedules.map(schedule => (
                   <tr key={schedule.scheduleId}>
                     <td>
-                      <code>{formatExpression(schedule)}</code>
+                      <code>{formatExpression(schedule.expression)}</code>
                     </td>
+                    <td>{schedule.timezone}</td>
                     <td>{schedule.name || '—'}</td>
                     <td>{schedule.state}</td>
                   </tr>

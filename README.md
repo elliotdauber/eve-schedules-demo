@@ -13,6 +13,7 @@ On first load, pick a **display name**. Schedules are created in a namespace mat
 - **Chat-first UI** — create, list, get, and delete schedules via Eve agent tools
 - **Queue-based schedules** — all schedules publish to a queue topic (like [cron-test](https://github.com/vercel/cron-test))
 - **Scheduled AI prompts** — ask the agent to answer a question later or on a cron
+- **Timezone-aware schedules** — pick your IANA timezone in the UI (saved in the browser); all creates use it
 - **Serverless-friendly display** — polls `/api/schedules` (Schedules API) and `/api/activity` (Vercel Blob) instead of in-memory WebSockets
 
 ## Agent tools

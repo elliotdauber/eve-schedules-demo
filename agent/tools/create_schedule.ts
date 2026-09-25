@@ -5,7 +5,10 @@ import { DEFAULT_QUEUE_TOPIC } from '@/lib/constants';
 import { createJobPayload } from '@/lib/schedule-payload';
 import { toScheduleSummary } from '@/lib/schedule-present';
 import { defaultScheduleName } from '@/lib/schedules-tenant';
-import { getTenantNamespaceFromContext } from '@/lib/tool-tenant';
+import {
+  getScheduleTimezoneFromContext,
+  getTenantNamespaceFromContext,
+} from '@/lib/tool-tenant';
 
 const expressionSchema = z.discriminatedUnion('type', [
   z.object({
@@ -14,7 +17,12 @@ const expressionSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('single'),
-    at: z.string().min(1),
+    at: z
+      .string()
+      .min(1)
+      .describe(
+        'Local datetime YYYY-MM-DDTHH:mm in the schedule timezone (no Z suffix)'
+      ),
   }),
 ]);
 
@@ -36,6 +44,7 @@ export default defineTool({
   }),
   async execute(input, ctx) {
     const namespace = getTenantNamespaceFromContext(ctx);
+    const timezone = getScheduleTimezoneFromContext(ctx);
     const payload = input.payload
       ? createJobPayload(input.payload)
       : undefined;
@@ -43,6 +52,7 @@ export default defineTool({
     const schedule = await Schedules.create({
       name: input.name ?? defaultScheduleName('job'),
       expression: input.expression,
+      timezone,
       target: { topic: DEFAULT_QUEUE_TOPIC },
       namespace,
       ...(payload ? { payload } : {}),

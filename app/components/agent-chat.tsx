@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react';
 import { useEveAgent } from 'eve/react';
+import { buildTenantRequestHeaders } from '@/lib/request-headers';
 import { useTenant } from '@/lib/tenant-context';
-import { TENANT_HEADER } from '@/lib/tenant';
 import styles from './agent-chat.module.css';
 
 const SUGGESTIONS = [
@@ -87,19 +87,31 @@ function formatAgentError(error: Error): string {
 }
 
 export function AgentChat() {
-  const { tenantName } = useTenant();
+  const { tenantName, timezone } = useTenant();
 
   if (!tenantName) {
     return null;
   }
 
-  return <AgentChatSession key={tenantName} tenantName={tenantName} />;
+  return (
+    <AgentChatSession
+      key={`${tenantName}:${timezone}`}
+      tenantName={tenantName}
+      timezone={timezone}
+    />
+  );
 }
 
-function AgentChatSession({ tenantName }: { tenantName: string }) {
+function AgentChatSession({
+  tenantName,
+  timezone,
+}: {
+  tenantName: string;
+  timezone: string;
+}) {
   const tenantHeaders = useMemo(
-    () => ({ [TENANT_HEADER]: tenantName }),
-    [tenantName]
+    () => buildTenantRequestHeaders(tenantName, timezone),
+    [tenantName, timezone]
   );
   const agent = useEveAgent({ headers: tenantHeaders });
   const isBusy =

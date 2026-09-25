@@ -1,4 +1,5 @@
 import type { ToolContext } from 'eve/tools';
+import { normalizeTimezone } from '@/lib/schedule-timezone';
 import { tenantNamespace } from '@/lib/tenant';
 
 function readNamespaceAttribute(
@@ -27,6 +28,30 @@ export function getTenantNamespaceFromContext(ctx: ToolContext): string {
 
   throw new Error(
     'Tenant namespace missing. Reload the page and choose a display name.'
+  );
+}
+
+function readTimezoneAttribute(
+  attributes: Readonly<Record<string, string | readonly string[]>> | undefined
+): string | null {
+  const value = attributes?.scheduleTimezone;
+  if (typeof value === 'string' && value.length > 0) {
+    return value;
+  }
+  return null;
+}
+
+export function getScheduleTimezoneFromContext(ctx: ToolContext): string {
+  const timezone =
+    readTimezoneAttribute(ctx.session.auth.current?.attributes) ??
+    readTimezoneAttribute(ctx.session.auth.initiator?.attributes);
+
+  if (timezone) {
+    return normalizeTimezone(timezone);
+  }
+
+  throw new Error(
+    'Schedule timezone missing. Reload the page and choose a timezone.'
   );
 }
 

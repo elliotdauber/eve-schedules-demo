@@ -4,6 +4,7 @@ import { AgentChat } from './components/agent-chat';
 import { ActivityPanel } from './components/activity-panel';
 import { TenantGate } from './components/tenant-gate';
 import { TenantSwitcher } from './components/tenant-switcher';
+import { TimezoneSelect } from './components/timezone-select';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
             </p>
           </div>
           <div className={styles.headerMeta}>
+            <TimezoneSelect compact />
             <TenantSwitcher />
           </div>
         </header>

@@ -9,6 +9,12 @@ import {
   useState,
 } from 'react';
 import {
+  DEFAULT_SCHEDULE_TIMEZONE,
+  detectBrowserTimezone,
+  normalizeTimezone,
+  TIMEZONE_STORAGE_KEY,
+} from '@/lib/schedule-timezone';
+import {
   normalizeTenantName,
   TENANT_STORAGE_KEY,
   tenantNamespace,
@@ -17,8 +23,10 @@ import {
 type TenantContextValue = {
   tenantName: string | null;
   tenantNamespace: string | null;
+  timezone: string;
   ready: boolean;
   setTenantName: (name: string) => void;
+  setTimezone: (timezone: string) => void;
   clearTenantName: () => void;
 };
 
@@ -40,12 +48,27 @@ function readStoredTenantName(): string | null {
   }
 }
 
+function readStoredTimezone(): string {
+  try {
+    const stored = window.localStorage.getItem(TIMEZONE_STORAGE_KEY);
+    if (stored) {
+      return normalizeTimezone(stored);
+    }
+  } catch {
+    // fall through to browser default
+  }
+
+  return detectBrowserTimezone();
+}
+
 export function TenantProvider({ children }: { children: React.ReactNode }) {
   const [tenantName, setTenantNameState] = useState<string | null>(null);
+  const [timezone, setTimezoneState] = useState(DEFAULT_SCHEDULE_TIMEZONE);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setTenantNameState(readStoredTenantName());
+    setTimezoneState(readStoredTimezone());
     setReady(true);
   }, []);
 
@@ -53,6 +76,12 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     const normalized = normalizeTenantName(rawName);
     window.localStorage.setItem(TENANT_STORAGE_KEY, normalized);
     setTenantNameState(normalized);
+  }, []);
+
+  const setTimezone = useCallback((rawTimezone: string) => {
+    const normalized = normalizeTimezone(rawTimezone);
+    window.localStorage.setItem(TIMEZONE_STORAGE_KEY, normalized);
+    setTimezoneState(normalized);
   }, []);
 
   const clearTenantName = useCallback(() => {
@@ -64,11 +93,13 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     () => ({
       tenantName,
       tenantNamespace: tenantName ? tenantNamespace(tenantName) : null,
+      timezone,
       ready,
       setTenantName,
+      setTimezone,
       clearTenantName,
     }),
-    [tenantName, ready, setTenantName, clearTenantName]
+    [tenantName, timezone, ready, setTenantName, setTimezone, clearTenantName]
   );
 
   return (

@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import { TimezoneSelect } from '@/app/components/timezone-select';
 import { useTenant } from '@/lib/tenant-context';
 import styles from './tenant-gate.module.css';
 
@@ -39,15 +40,16 @@ export function TenantGate({ children }: { children: React.ReactNode }) {
       <form className={styles.card} onSubmit={handleSubmit}>
         <h1 className={styles.title}>Choose a display name</h1>
         <p className={styles.lead}>
-          Your schedules are grouped under your display name (e.g.{' '}
-          <code className={styles.inlineCode}>elliot</code>). Activity logs are
-          stored in a matching blob folder.
+          Pick a timezone and display name. Schedules are grouped under your
+          name (e.g. <code className={styles.inlineCode}>elliot</code>) and
+          cron times use your selected timezone.
         </p>
         <div className={styles.warning} role="note">
           <strong>Demo only.</strong> This is not secure multi-tenancy — anyone
           who enters the same name can see and manage those schedules and
           activity history.
         </div>
+        <TimezoneSelect />
         <label className={styles.field}>
           <span className={styles.label}>Display name</span>
           <input

@@ -4,6 +4,7 @@ export type ScheduleSummary = {
   scheduleId: string;
   name: string;
   expression: ScheduleExpression;
+  timezone: string;
   state: Schedule['state'];
   createdAt: number;
   updatedAt: number;
@@ -18,6 +19,7 @@ export function toScheduleSummary(
     scheduleId: schedule.scheduleId,
     name: schedule.name,
     expression: schedule.expression,
+    timezone: schedule.timezone,
     state: schedule.state,
     createdAt: schedule.createdAt,
     updatedAt: schedule.updatedAt,
@@ -25,11 +27,17 @@ export function toScheduleSummary(
   };
 }
 
-export function formatExpression(expression: ScheduleExpression): string {
+export function formatExpression(
+  expression: ScheduleExpression,
+  timezone?: string
+): string {
   if (expression.type === 'cron') {
-    return expression.cron;
+    return timezone
+      ? `${expression.cron} (${timezone})`
+      : expression.cron;
   }
-  return expression.at;
+
+  return timezone ? `${expression.at} (${timezone})` : expression.at;
 }
 
 export function payloadLabel(payload: unknown): string | null {

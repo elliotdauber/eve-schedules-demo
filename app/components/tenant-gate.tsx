@@ -39,9 +39,9 @@ export function TenantGate({ children }: { children: React.ReactNode }) {
       <form className={styles.card} onSubmit={handleSubmit}>
         <h1 className={styles.title}>Choose a display name</h1>
         <p className={styles.lead}>
-          Your schedules are grouped under{' '}
-          <code className={styles.inlineCode}>user.your-name</code>. Activity
-          logs are stored in a matching blob folder.
+          Your schedules are grouped under your display name (e.g.{' '}
+          <code className={styles.inlineCode}>elliot</code>). Activity logs are
+          stored in a matching blob folder.
         </p>
         <div className={styles.warning} role="note">
           <strong>Demo only.</strong> This is not secure multi-tenancy — anyone

@@ -6,7 +6,10 @@ import { DEFAULT_QUEUE_TOPIC } from '@/lib/constants';
 import { createPromptPayload } from '@/lib/schedule-payload';
 import { toScheduleSummary } from '@/lib/schedule-present';
 import { defaultScheduleName } from '@/lib/schedules-tenant';
-import { formatLocalScheduleTime } from '@/lib/schedule-timezone';
+import {
+  prepareScheduleAtFromDate,
+  prepareSingleScheduleAt,
+} from '@/lib/schedule-timezone';
 import {
   getScheduleTimezoneFromContext,
   getTenantNamespaceFromContext,
@@ -23,7 +26,7 @@ const whenSchema = z.discriminatedUnion('type', [
       .string()
       .min(1)
       .describe(
-        'Local datetime YYYY-MM-DDTHH:mm in the schedule timezone (no Z suffix)'
+        'Future local datetime YYYY-MM-DDTHH:mm (minute precision, no seconds). Prefer type "delay" for relative times.'
       ),
   }),
   z.object({
@@ -47,7 +50,7 @@ function whenToExpression(
     const amount = Number(match[1]);
     const unit = match[2];
     const multipliers = { s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000 };
-    const at = formatLocalScheduleTime(
+    const at = prepareScheduleAtFromDate(
       new Date(
         Date.now() + amount * multipliers[unit as keyof typeof multipliers]
       ),
@@ -57,12 +60,19 @@ function whenToExpression(
     return { type: 'single', at };
   }
 
+  if (when.type === 'single') {
+    return {
+      type: 'single',
+      at: prepareSingleScheduleAt(when.at, timezone),
+    };
+  }
+
   return when;
 }
 
 export default defineTool({
   description:
-    'Schedule an AI prompt to run later or on a cron. Use delay for relative times like 1m or 30s. Answers appear in the activity panel.',
+    'Schedule an AI prompt to run later or on a cron. For relative times ("in 30 seconds", "in 1 minute"), always use when.type "delay" — never type "single" with a hand-computed at. Answers appear in the activity panel.',
   inputSchema: z.object({
     prompt: z.string().min(1),
     when: whenSchema,

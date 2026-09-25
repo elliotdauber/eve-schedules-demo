@@ -1,6 +1,10 @@
 import { localDev, none } from 'eve/channels/auth';
 import { defaultEveAuth, eveChannel } from 'eve/channels/eve';
-import { normalizeTimezone, TIMEZONE_HEADER } from '@/lib/schedule-timezone';
+import {
+  currentLocalScheduleTime,
+  normalizeTimezone,
+  TIMEZONE_HEADER,
+} from '@/lib/schedule-timezone';
 import {
   normalizeTenantName,
   tenantNamespace,
@@ -23,6 +27,7 @@ export default eveChannel({
     const tenantName = normalizeTenantName(rawName);
     const namespace = tenantNamespace(tenantName);
     const scheduleTimezone = normalizeTimezone(rawTimezone);
+    const nowLocal = currentLocalScheduleTime(scheduleTimezone);
     const baseAuth = defaultEveAuth(ctx);
 
     const attributes = {
@@ -44,6 +49,7 @@ export default eveChannel({
       context: [
         `Tenant namespace: ${namespace}. All schedule create, list, get, and delete operations are scoped to this namespace automatically.`,
         `Schedule timezone: ${scheduleTimezone}. Cron expressions and one-time at values are interpreted in this timezone.`,
+        `Current local time: ${nowLocal}. Never use past years or datetimes before this. One-time schedules require minute precision (YYYY-MM-DDTHH:mm, no seconds) and must fire at least 15 seconds from now. For "in X seconds/minutes/hours", always use when.type "delay" — the server aligns the time.`,
       ],
     };
   },

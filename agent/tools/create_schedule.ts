@@ -5,6 +5,7 @@ import { DEFAULT_QUEUE_TOPIC } from '@/lib/constants';
 import { createJobPayload } from '@/lib/schedule-payload';
 import { toScheduleSummary } from '@/lib/schedule-present';
 import { defaultScheduleName } from '@/lib/schedules-tenant';
+import { prepareSingleScheduleAt } from '@/lib/schedule-timezone';
 import {
   getScheduleTimezoneFromContext,
   getTenantNamespaceFromContext,
@@ -21,7 +22,7 @@ const expressionSchema = z.discriminatedUnion('type', [
       .string()
       .min(1)
       .describe(
-        'Local datetime YYYY-MM-DDTHH:mm in the schedule timezone (no Z suffix)'
+        'Future local datetime YYYY-MM-DDTHH:mm (minute precision, no seconds). Must be at least 15 seconds in the future.'
       ),
   }),
 ]);
@@ -45,13 +46,20 @@ export default defineTool({
   async execute(input, ctx) {
     const namespace = getTenantNamespaceFromContext(ctx);
     const timezone = getScheduleTimezoneFromContext(ctx);
+    const expression =
+      input.expression.type === 'single'
+        ? {
+            type: 'single' as const,
+            at: prepareSingleScheduleAt(input.expression.at, timezone),
+          }
+        : input.expression;
     const payload = input.payload
       ? createJobPayload(input.payload)
       : undefined;
 
     const schedule = await Schedules.create({
       name: input.name ?? defaultScheduleName('job'),
-      expression: input.expression,
+      expression,
       timezone,
       target: { topic: DEFAULT_QUEUE_TOPIC },
       namespace,

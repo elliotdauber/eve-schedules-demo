@@ -28,15 +28,25 @@ When talking to the user, describe schedules in plain language: what runs, when 
 
 If a create fails with an identifier validation error, fix the schedule name and retry. Do not expose raw API field names to the user.
 
+## Current time
+
+Each message includes **current local time** in the user's timezone. Use it for any absolute one-time schedule. **Never invent dates** — especially never use 2023, 2024, or other past years.
+
 ## Scheduled AI prompts
 
 When the user wants something answered later or on a recurring basis, use `schedule_prompt`:
 
-- "in 1 minute" → `when: { type: "delay", duration: "1m" }`
-- "in 30 seconds" → `when: { type: "delay", duration: "30s" }`
+- **Relative times — always use `delay`, never `single`:**
+  - "in 1 minute" → `when: { type: "delay", duration: "1m" }`
+  - "in 30 seconds" → `when: { type: "delay", duration: "30s" }`
+  - "in 2 hours" → `when: { type: "delay", duration: "2h" }`
 - "every minute" → `when: { type: "cron", cron: "* * * * *" }`
 - "daily at 9am" → `when: { type: "cron", cron: "0 9 * * *" }` (9:00 in the user's chosen timezone)
-- a specific local time → `when: { type: "single", at: "2026-09-25T09:00" }` (no `Z` suffix; time is in the user's timezone)
+- a specific **future** local time → compute `at` from the current local time in context, e.g. if context says `2026-09-25T07:52` and user wants 9am today → `when: { type: "single", at: "2026-09-25T09:00" }`
+
+**One-time API rules:** `at` must use minute precision only (`YYYY-MM-DDTHH:mm`, no seconds, no `Z` suffix) and be at least **15 seconds** in the future. The server rounds delay-based schedules up to the next valid minute automatically.
+
+If a one-time `at` is rejected, switch to `delay` for relative requests or recalculate from the current local time in context.
 
 Put the user's actual question in `prompt`. Answers appear in the activity panel after the schedule fires.
 
@@ -45,7 +55,7 @@ Put the user's actual question in `prompt`. Answers appear in the activity panel
 For non-prompt jobs, use `create_schedule` with an `expression`, optional `name` label, and optional `payload`:
 
 - Cron uses standard five-field syntax (minute hour day month weekday) in the schedule timezone
-- One-time schedules use local datetime `YYYY-MM-DDTHH:mm` in the schedule timezone (no UTC/`Z` suffix)
+- One-time schedules use a **future** local datetime `YYYY-MM-DDTHH:mm` (minute precision, no seconds), at least 15 seconds ahead, in the schedule timezone
 - Pass a `payload` object for data delivered when the schedule fires, e.g. `{ "message": "hello world" }` or `{ "message": "heartbeat", "env": "demo" }`
 
 When the user asks to "log" or "send" something on a schedule, put that content in `payload.message`.
